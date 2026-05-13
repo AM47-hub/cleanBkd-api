@@ -56,6 +56,12 @@ MTH_IDX = {
     "jul": 7,"aug": 8,"sep": 9,"oct": 10,"nov": 11,"dec": 12
 }
 
+KEYWORDS = {
+    "flat", "number", "beside", "suburb", "type", "rent", "rooms", 
+    "available", "viewing", "from", "until", "agency", 
+    "person", "mobile", "comments"
+}
+
 app = Flask(__name__)
 
 @app.route('/ping', methods=['GET', 'HEAD'])
@@ -63,16 +69,10 @@ def wakeup():
     return make_response("Ready", 200)
 
 def initial_parse(dictated):
-    keywords = [
-        "flat", "number", "beside", "suburb", "type", "rent", "rooms", 
-        "available", "viewing", "from", "until", "agency", 
-        "person", "mobile", "comments"
-    ]
-
-    delimit = re.compile(r'\b(' + '|'.join(keywords) + r')\b', re.I)
+    delimit = re.compile(r'\b(' + '|'.join(KEYWORDS) + r')\b', re.I)
     chunks = list(delimit.finditer(dictated))
 
-    raw_vals = {k: "" for k in keywords}
+    raw_vals = {k: "" for k in KEYWORDS}
     for i in range(len(chunks)):
         start = chunks[i].end()
         if i + 1 < len(chunks):
