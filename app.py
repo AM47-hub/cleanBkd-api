@@ -306,7 +306,7 @@ def process():
         for addr_key in bkd_groups:
 
             bkd_list = bkd_groups[addr_key]
-            if all(b['vflag'] == "PAST" for b in bkd_list):
+            if all(b_note['vflag'] == "PAST" for b_note in bkd_list):
                 if addr_key in fnd_groups:
                     match_flag = [
                         f_note for f_note in fnd_groups[addr_key]
