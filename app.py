@@ -280,7 +280,7 @@ def process():
                         day_flag = "MUST BOOK"
                     else:
                         day_flag = "UNCLEAR"
-                    
+
                     # SOURCE ROUTING (Now both have vflag)
                     if "2Booked" in source:
                         bkd_fields = {
@@ -292,7 +292,7 @@ def process():
                         bkd_groups[delimit_addr].append(bkd_fields)
                     else:
                         fnd_fields = {
-                            "vflag": day_flag,
+                            "vflag": day_flag, 
                             "created": anchor
                         }
                         if delimit_addr not in fnd_groups:
@@ -304,25 +304,20 @@ def process():
                 continue
 
         for addr_key in bkd_groups:
-
             bkd_list = bkd_groups[addr_key]
             if all(b_note['vflag'] == "PAST" for b_note in bkd_list):
+                match_anchors = []
                 if addr_key in fnd_groups:
-                    match_flag = [
-                        f_note for f_note in fnd_groups[addr_key]
+                    match_anchors = [
+                        f_note['created'] for f_note in fnd_groups[addr_key]
                         if f_note['vflag'] in ["PAST", "MUST BOOK"]
                      ]
-                        
-                    # Append a new object for PAST match pairs
-                        results.append({
-                            "bkd_anchor": [b_note['created'] for b_note in bkd_list],
-                            "fnd_anchor": [f_note['created'] for f_note in match_flag]
-                        })
-                else:
-                    # Orphans: BKD exists and is PAST, but no FND match found
+
+                # Append a new object for PAST match pairs
+                for b_note in bkd_list:
                     results.append({
-                        "bkd_anchor": [b_note['created'] for b_note in bkd_list],
-                        "fnd_anchor": []
+                        "bkd_anchor": b_note['created'],
+                        "fnd_anchor": match_anchors
                     })
 
         return make_response(json.dumps(results), 200, {"Content-Type": "application/json"})
