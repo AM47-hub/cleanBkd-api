@@ -186,7 +186,7 @@ def process():
                             if 11 <= (d_int % 100) <= 13:
                                 suffix = "th"
                             else:
-                                suffix =ENCLITIC_MAP.get(d_int % 10, "th")
+                                suffix = ENCLITIC_MAP.get(d_int % 10, "th")
                         
                         val = re.sub(rf'\b{word}\b', f"{d_int}{suffix}", val, flags=re.I)
                         tokens[key] = val
@@ -306,23 +306,14 @@ def process():
         for addr_key in bkd_groups:
 
             bkd_list = bkd_groups[addr_key]
-            all_past = True
-            for bflag in bkd_list:
-                if bflag['vflag'] != "PAST":
-                    all_past = False
-                    break
-
-            if all_past:
+            if all(b['vflag'] == "PAST" for b in bkd_list):
                 if addr_key in fnd_groups:
-                    fnd_list = fnd_groups[addr_key]
-                    # removed - if len(fnd_list) > 1:
                     match_flag = [
-                        f_note for f_note in fnd_list
-                            if f_note['vflag'] in ["PAST", "MUST BOOK"]
+                        f_note for f_note in fnd_groups[addr_key]
+                        if f_note['vflag'] in ["PAST", "MUST BOOK"]
                      ]
-
+                        
                     # Append a new object for PAST match pairs
-                    if match_flag:
                         results.append({
                             "bkd_anchor": [b_note['created'] for b_note in bkd_list],
                             "fnd_anchor": [f_note['created'] for f_note in match_flag]
