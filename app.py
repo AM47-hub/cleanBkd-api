@@ -315,7 +315,7 @@ def process():
             if all_past:
                 if addr_key in fnd_groups:
                     fnd_list = fnd_groups[addr_key]
-                    if len(fnd_list) > 1:
+                    # removed - if len(fnd_list) > 1:
                     match_flag = [
                         f_note for f_note in fnd_list
                             if f_note['vflag'] in ["PAST", "MUST BOOK"]
