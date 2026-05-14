@@ -271,29 +271,28 @@ def process():
                                     view_date += timedelta(days=7)
 
                     # Day Flag assigned
-                    if view_date and view_date < status_dt:
-                        day_flag = "PAST"
-                    elif view_date:
-                        day_flag = "FUTURE"
+                    if view_date:
+                        if view_date < status_dt:
+                            day_flag = "PAST"
+                        else:
+                            day_flag = "LIVE"
+                    elif "must book" in view_string:
+                        day_flag = "MUST BOOK"
                     else:
-                        day_flag = "UNKNOWN"
-
-                    appoint = "must book" in view_string
+                        day_flag = "UNCLEAR"
                     
                     # SOURCE ROUTING (Now both have vflag)
                     if "2Booked" in source:
                         bkd_fields = {
                             "created": anchor, 
                             "vflag": day_flag, 
-                            "TBC": appoint
                         }
                         if delimit_addr not in bkd_groups:
                             bkd_groups[delimit_addr] = []
                         bkd_groups[delimit_addr].append(bkd_fields)
                     else:
                         fnd_fields = {
-                            "TBC": appoint,
-                            "vflag": day_flag, 
+                            "vflag": day_flag,
                             "created": anchor
                         }
                         if delimit_addr not in fnd_groups:
@@ -305,6 +304,7 @@ def process():
                 continue
 
         for addr_key in bkd_groups:
+
             bkd_list = bkd_groups[addr_key]
             all_past = True
             for bflag in bkd_list:
@@ -315,14 +315,13 @@ def process():
             if all_past:
                 if addr_key in fnd_groups:
                     fnd_list = fnd_groups[addr_key]
-                    match_flag = []
                     if len(fnd_list) > 1:
-                        for fflag in fnd_list:
-                            if fflag['TBC']:
-                                match_flag.append(fflag)
-                    else:
-                        match_flag = fnd_list    
-                        # Append a new object for PAST match pairs
+                    match_flag = [
+                        f_note for f_note in fnd_list
+                            if f_note['vflag'] in ["PAST", "MUST BOOK"]
+                     ]
+
+                    # Append a new object for PAST match pairs
                     if match_flag:
                         results.append({
                             "bkd_anchor": [b_note['created'] for b_note in bkd_list],
