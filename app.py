@@ -271,7 +271,7 @@ def process():
                 else:
 
                     continue
-            except
+            except:
 
                 continue
         for addr_key in bkd_groups:
