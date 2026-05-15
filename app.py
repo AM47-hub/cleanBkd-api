@@ -139,7 +139,7 @@ def process():
                         val = val.replace('-', ' ')
                         val = re.sub(rf'\b(the|of)\b', '', val, flags=re.I)
                         val = re.sub(r'\s+', ' ', val).strip()
-                        debug_Ordinals.append(f"AFTER CLEANING (Cleaned): {val}")
+                        debug_Ordinals.append(f"AFTER CLEANING: {val}")
                         # Identify hybrid string (e.g., "20 third")
                         isHybrid = rf"\b(20|30)\s+({'|'.join(ORDINALS.keys())})\b"
                         if re.search(isHybrid, val, flags=re.I):
@@ -167,7 +167,7 @@ def process():
                                 suffix = "th"
                             else:
                                 suffix = ENCLITIC_MAP.get(d_int % 10, "th")
-                        val = re.sub(rf'\b{word}\b', f"{d_int}{suffix}", val, flags=re.I)
+                            val = re.sub(rf'\b{word}\b', f"{d_int}{suffix}", val, flags=re.I)
                         tokens[key] = val
                         debug_Ordinals.append(f"FINAL DATE STRING: {tokens[key]}")
                     delimit_addr = repair_addr(tokens)
@@ -283,7 +283,6 @@ def process():
             bkd_list = bkd_groups[addr_key]
             if all(b_note['vflag'] == "PAST" for b_note in bkd_list):
                 match_anchors = []
-            
                 if addr_key in fnd_groups:
                     match_anchors = [
                         f_note['created'] for f_note in fnd_groups[addr_key]
