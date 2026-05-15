@@ -275,10 +275,10 @@ def process():
                 else:
                     debug_Ordinals.append("Regex match failed")
                     continue
-                except Exception as e:
-                    debug_Ordinals.append(f"Logic Error: {str(e)}")
-                    print(f"CRITICAL ERROR: {e}", flush=True)
-                    continue
+            except Exception as e:
+                debug_Ordinals.append(f"Logic Error: {str(e)}")
+                print(f"CRITICAL ERROR: {e}", flush=True)
+                continue
         for addr_key in bkd_groups:
             bkd_list = bkd_groups[addr_key]
             if all(b_note['vflag'] == "PAST" for b_note in bkd_list):
