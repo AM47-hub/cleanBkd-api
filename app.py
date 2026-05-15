@@ -145,6 +145,8 @@ def process():
                     anchor_dt = datetime.strptime(anch_clean, '%Y-%m-%d').date()
 
                     tokens = initial_parse(body)
+                    # --- DEBUG START ---
+                    print(f"DEBUG [{key}] - RAW: '{tokens.get(key, '')}'")
                     # Global Cardinal Repairs
                     for key in tokens:
                         val = tokens[key]
@@ -156,20 +158,28 @@ def process():
                     for key in ['available', 'viewing']:
                         val = tokens.get(key, '')
                         if not val: continue
-                        
+                        print(f"DEBUG [{key}] - AFTER GLOBAL REPAIR: '{val}'")
                         # Remove hyphens, "the", and "of"
                         val = val.replace('-', ' ')
                         val = re.sub(rf'\b(the|of)\b', '', val, flags=re.I)
                         val = re.sub(r'\s+', ' ', val).strip()
-
+                        print(f"DEBUG [{key}] - AFTER CLEANING (Cleaned): '{val}'")
                         # Identify hybrid string (e.g., "20 third")
+
                         isHybrid = rf"\b(20|30)\s+({'|'.join(ORDINALS.keys())})\b"
+
+                        if re.search(isHybrid, val, flags=re.I):
+                            print(f"DEBUG [{key}] - isHybrid MATCH FOUND for string: '{val}'")
+                        else:
+                            print(f"DEBUG [{key}] - isHybrid NO MATCH. Check if space is missing between tokens.")
                         def convert_Hybrid(match):
                             tens_val = int(match.group(1))
                             units_Ordinal = match.group(2).lower()
+
                             # Convert units_part to integer if Ordinal
                             units_val = int(ORDINALS.get(units_Ordinal, 0))
                             total = tens_val + units_val
+
                             # Attach enclitic
                             if 11 <= (total % 100) <= 13:
                                 suffix = "th"
@@ -181,15 +191,17 @@ def process():
 
                         # If not, simple Ordinal conversion (e.g., "sixth")
                         for word, digit in ORDINALS.items():
-                            # Convert to int for the suffix check, or use a map
-                            d_int = int(digit)
-                            if 11 <= (d_int % 100) <= 13:
-                                suffix = "th"
-                            else:
-                                suffix = ENCLITIC_MAP.get(d_int % 10, "th")
-                        
+                        # Convert to int for the suffix check, or use a map
+                        d_int = int(digit)
+                        if 11 <= (d_int % 100) <= 13:
+                            suffix = "th"
+                        else:
+
+                            suffix = ENCLITIC_MAP.get(d_int % 10, "th")
                         val = re.sub(rf'\b{word}\b', f"{d_int}{suffix}", val, flags=re.I)
+
                         tokens[key] = val
+                        print(f"DEBUG [{key}] - FINAL DATE STRING: '{tokens[key]}'")
 
                     delimit_addr = repair_addr(tokens)
                     view_string = tokens.get('viewing', '').lower()
