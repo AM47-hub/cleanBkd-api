@@ -97,14 +97,13 @@ def process():
         payload = PassOut.get('dictated', '')
         raw = str(payload).replace('\xa0', ' ').strip()
         if not raw: 
-            #return make_response(json.dumps([]), 200)
-            return make_response(json.dumps({"debug_error": "No text found in payload"}), 200)
+            return make_response(json.dumps([]), 200)
         notes = [s.strip() for s in raw.split('|') if 'Content:' in s]
         # Initialize results as an empty objects
         bkd_groups = {}
         fnd_groups = {}
         results = []
-        debug_Ordinals = []
+
         for text in notes:
             try:
                 key_values = text.split('Content:', 1)
@@ -123,7 +122,7 @@ def process():
                     status_dt = datetime.strptime(status, '%Y-%m-%d').date()
                     anchor_dt = datetime.strptime(anch_clean, '%Y-%m-%d').date()
                     tokens = initial_parse(body)
-                    debug_Ordinals.append(f"RAW: {tokens.get('viewing', '')}")
+
                     # Global Cardinal Repairs
                     for key in tokens:
                         val = tokens[key]
@@ -134,18 +133,15 @@ def process():
                     for key in ['available', 'viewing']:
                         val = tokens.get(key, '')
                         if not val: continue
-                        debug_Ordinals.append(f"AFTER GLOBAL REPAIR: {val}")
+
                         # Remove hyphens, "the", and "of"
                         val = val.replace('-', ' ')
                         val = re.sub(rf'\b(the|of)\b', '', val, flags=re.I)
                         val = re.sub(r'\s+', ' ', val).strip()
-                        debug_Ordinals.append(f"AFTER CLEANING: {val}")
+
                         # Identify hybrid string (e.g., "20 third")
                         isHybrid = rf"\b(20|30)\s+({'|'.join(ORDINALS.keys())})\b"
-                        if re.search(isHybrid, val, flags=re.I):
-                            debug_Ordinals.append(f"isHybrid MATCH FOUND for string: {val}")
-                        else:
-                            debug_Ordinals.append("isHybrid NO MATCH. Check if space is missing between tokens.")
+
                         def convert_Hybrid(match):
                             tens_val = int(match.group(1))
                             units_Ordinal = match.group(2).lower()
@@ -169,7 +165,7 @@ def process():
                                 suffix = ENCLITIC_MAP.get(d_int % 10, "th")
                             val = re.sub(rf'\b{word}\b', f"{d_int}{suffix}", val, flags=re.I)
                         tokens[key] = val
-                        debug_Ordinals.append(f"FINAL DATE STRING: {tokens[key]}")
+
                     delimit_addr = repair_addr(tokens)
                     view_string = tokens.get('viewing', '').lower()
                     view_date = None
@@ -273,11 +269,10 @@ def process():
                             fnd_groups[delimit_addr] = []
                         fnd_groups[delimit_addr].append(fnd_fields)
                 else:
-                    debug_Ordinals.append("Regex match failed")
+
                     continue
-            except Exception as e:
-                debug_Ordinals.append(f"Logic Error: {str(e)}")
-                print(f"CRITICAL ERROR: {e}", flush=True)
+            except
+
                 continue
         for addr_key in bkd_groups:
             bkd_list = bkd_groups[addr_key]
@@ -294,19 +289,9 @@ def process():
                         "bkd_anchor": b_note['created'],
                         "fnd_anchor": match_anchors
                     })
-        # THE DEBUG REPORT
-        debug_report = {
-            "summary": {
-                "total_notes_found": len(notes),
-                "booked_count": len(bkd_groups),
-                "found_count": len(fnd_groups),
-                "error_count": len(debug_Ordinals)
-            },
-            "conversion_log": debug_Ordinals[:5]
-        }
-        print(f"DEBUG REPORT: {json.dumps(debug_report, indent=2)}", flush=True)
-        #return make_response(json.dumps(results), 200, {"Content-Type": "application/json"})
-        return make_response(json.dumps(debug_report), 200, {"Content-Type": "application/json"})
+
+        return make_response(json.dumps(results), 200, {"Content-Type": "application/json"})
+
     except Exception as e:
         return make_response(json.dumps([{"fatal_crash": str(e)}]), 200)
 if __name__ == "__main__":
