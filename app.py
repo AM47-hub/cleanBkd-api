@@ -160,7 +160,7 @@ def process():
                             return f"{total}{suffix}"
                         val = re.sub(isHybrid, convert_Hybrid, val, flags=re.I)
                         # If not, simple Ordinal conversion (e.g., "sixth")
-                            for word, digit in ORDINALS.items():
+                        for word, digit in ORDINALS.items():
                             # Convert to int for the suffix check, or use a map
                             d_int = int(digit)
                             if 11 <= (d_int % 100) <= 13:
